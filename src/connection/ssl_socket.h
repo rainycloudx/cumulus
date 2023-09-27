@@ -12,7 +12,7 @@
 namespace cumulus::connection {
     class SSLSocket {
     public:
-        SSLSocket(unsigned int port);
+        SSLSocket(const std::string& certFile, const std::string& keyFile, int fd);
 
         SSLSocket(const char* address, unsigned int port);
 
@@ -26,7 +26,7 @@ namespace cumulus::connection {
 
         bool accept();
 
-        bool send(const char *data, int size);
+        int send(const char *data, int size);
 
         int receive(char *buffer, int size);
 
@@ -37,6 +37,9 @@ namespace cumulus::connection {
         int _socket_fd;
         const char* _address;
         unsigned int _port;
+
+    private:
+        void initialize_ssl(const std::string& certFile, const std::string& keyFile);
     };
 }
 

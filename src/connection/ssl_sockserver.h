@@ -12,9 +12,19 @@
 namespace cumulus::connection {
     class SSLSocketServer {
     public:
-        SSLSocketServer(const std::string &certFile, const std::string &keyFile);
+        SSLSocketServer(const std::string& certFile, const std::string& keyFile, int port);
 
-        std::unique_ptr<SSLSocket> _socket_ptr;
+        std::unique_ptr<SSLSocket> accept(void);
+
+        bool listen(int backlog);
+
+    private:
+        const std::string _certFile;
+        const std::string _keyFile;
+        int _server_socket_fd;
+        int _port;
+
+        void initialize_socket_server();
     };
 }
 

@@ -9,7 +9,7 @@ namespace cumulus {
 
 class App {
 public:
-    App();
+    App(int argc, char *argv[], char *argp[]);
     ~App();
 
     void run(void);

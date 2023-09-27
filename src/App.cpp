@@ -6,7 +6,7 @@
 
 namespace cumulus {
 
-App::App() {
+App::App(int argc, char *argv[], char *argp[]) {
 
 }
 

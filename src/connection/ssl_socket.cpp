@@ -4,96 +4,71 @@
 
 #include "ssl_socket.h"
 
-#include <iostream>
-#include <cstring>
 #include <unistd.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
+#include "../constants/errors.h"
+
 namespace cumulus::connection {
 
-SSLSocket::SSLSocket(unsigned int port)
-        : _ctx(nullptr), _ssl(nullptr), _socket_fd(-1), _port(port) {
-    SSL_library_init();
+SSLSocket::SSLSocket(const std::string& certFile, const std::string& keyFile, int fd)
+        : _ctx(nullptr), _ssl(nullptr), _socket_fd(fd) {
+    initialize_ssl(certFile, keyFile);
+}
+
+void SSLSocket::initialize_ssl(const std::string& certFile, const std::string& keyFile) {
     SSL_load_error_strings();
+    ERR_load_crypto_strings();
+
+    OpenSSL_add_all_algorithms();
+    SSL_library_init();
 
     _ctx = SSL_CTX_new(SSLv23_method());
     if (!_ctx) {
-        std::cerr << "SSL_CTX_new failed." << std::endl;
-        exit(1);
+        throw std::runtime_error(error_strings::SSL_INIT_FAILED);
     }
 
-    _socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (_socket_fd != -1) {
-        std::cerr << "socket fd creation failed failed." << std::endl;
-        exit(1);
+    if (SSL_CTX_use_certificate_file(_ctx, certFile.c_str(), SSL_FILETYPE_PEM) <= 0 ||
+        SSL_CTX_use_PrivateKey_file(_ctx, keyFile.c_str(), SSL_FILETYPE_PEM) <= 0) {
+        throw std::runtime_error(error_strings::CERT_KEY_LOAD_FAILED);
+    }
+
+    _ssl = SSL_new(_ctx);
+    if (!_ssl) {
+        throw std::runtime_error(error_strings::SSL_INIT_FAILED);
+    }
+
+    SSL_set_fd(_ssl, _socket_fd);
+
+    if (SSL_accept(_ssl) <= 0) {
+        throw std::runtime_error(error_strings::SSL_INIT_FAILED);
     }
 }
-
-SSLSocket::SSLSocket(const char* address, unsigned int port)
-        : SSLSocket(port) {
-
-    _address = address;
-
-    sockaddr_in serverAddr{};
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(_port);
-    serverAddr.sin_addr.s_addr = inet_addr(_address);
-
-}
-
 
 SSLSocket::~SSLSocket() {
     close();
     if (_ctx) SSL_CTX_free(_ctx);
 }
 
-bool SSLSocket::bind(int port) {
-    sockaddr_in serverAddr{};
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(port);
-    serverAddr.sin_addr.s_addr = INADDR_ANY;
-
-    return ::bind(_socket_fd, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) == 0;
-}
-
-bool SSLSocket::listen(int backlog) {
-    return ::listen(_socket_fd, backlog) == 0;
-}
-
-bool SSLSocket::accept() {
-    sockaddr_in clientAddr{};
-    socklen_t clientAddrLen = sizeof(clientAddr);
-    int clientSocket = ::accept(_socket_fd, (struct sockaddr *) &clientAddr, &clientAddrLen);
-
-    if (clientSocket == -1) {
-        return false;
+int SSLSocket::send(const char *data, int size) {
+    int totalSent = 0;
+    while (size > 0) {
+        int _sent = SSL_write(_ssl, data + totalSent, size);
+        totalSent += _sent;
+        size -= _sent;
     }
-
-    // Create an SSL object and associate it with the client socket
-    _ssl = SSL_new(_ctx);
-    if (!_ssl) {
-        return false;
-    }
-    SSL_set_fd(_ssl, clientSocket);
-
-    // Perform the SSL handshake
-    if (SSL_accept(_ssl) <= 0) {
-        return false;
-    }
-
-    _socket_fd = clientSocket;
-    return true;
-}
-
-bool SSLSocket::send(const char *data, int size) {
-    return SSL_write(_ssl, data, size) > 0;
+    return totalSent;
 }
 
 int SSLSocket::receive(char *buffer, int size) {
-    return SSL_read(_ssl, buffer, size);
+    int totalRecvd = 0;
+    while (size > 0) {
+        int _recvd = SSL_read(_ssl, buffer + totalRecvd, size);
+        totalRecvd += _recvd;
+        size -= _recvd;
+    }
+    return totalRecvd;
 }
 
 void SSLSocket::close() {
