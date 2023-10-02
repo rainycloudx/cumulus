@@ -13,6 +13,8 @@ namespace cumulus::constants {
         const std::string CUMULUS_HOST = "localhost";
         const unsigned int CUMULUS_PORT = 54398;
         const std::string PROG_NAME = "Cumulus";
+        const std::string KEY_FILE_PATH = "CUMULUS_KEY_FILE_PATH";
+        const std::string CERT_FILE_PATH = "CUMULUS_CERT_FILE_PATH";
     }
 
     namespace protocol {
