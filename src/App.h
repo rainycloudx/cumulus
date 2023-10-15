@@ -5,6 +5,7 @@
 #ifndef CUMULUS_APP_H
 #define CUMULUS_APP_H
 
+#include "auth/BaseAuth.h"
 #include "connection/ssl_sockserver.h"
 #include <string>
 
@@ -17,11 +18,16 @@ public:
 
     void run(void);
 
-    std::string KEY_FILE_PATH;
-    std::string CERT_FILE_PATH;
-
 private:
+    std::map<std::string, std::string> _env_vars =
+            {
+                    { constants::app_global::CERT_FILE_PATH_KEY, "" },
+                    { constants::app_global::KEY_FILE_PATH_KEY, "" },
+                    { constants::app_global::FIREBASE_WEBAPI_KEY_KEY, "" }
+            };
+
     void parse_env_variables(char **argp);
+
     void handle_incoming_connections(std::shared_ptr<connection::SSLSocketServer> server);
 };
 

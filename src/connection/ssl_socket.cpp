@@ -4,16 +4,23 @@
 
 #include "ssl_socket.h"
 
+#include <errno.h>
+#include <iostream>
+#include <sys/socket.h>
 #include <unistd.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <stdexcept>
 
 #include "../constants/errors.h"
+#include "../constants/config.h"
 
 namespace cumulus::connection {
 
 SSLSocket::SSLSocket(const std::string& certFile, const std::string& keyFile, int fd)
         : _ctx(nullptr), _ssl(nullptr), _socket_fd(fd) {
+    // set timeout on socket read
+    setRecvTimeout(socket_read_timeout);
     initialize_ssl(certFile, keyFile);
 }
 
@@ -83,6 +90,17 @@ void SSLSocket::close() {
     }
 }
 
+int SSLSocket::setRecvTimeout(timeval timeout) {
+    int ret = setsockopt(_socket_fd,
+               SOL_SOCKET,
+               SO_RCVTIMEO,
+               &timeout,
+               sizeof(timeval));
+    if (!ret) {
+        std::cerr << "Unable to set recv timeout for socket. Moving on. Errno = " << errno << "\n";
+    }
+    return ret;
+}
 
 
 }

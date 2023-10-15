@@ -26,6 +26,8 @@ namespace cumulus::connection {
 
         bool accept();
 
+        int setRecvTimeout(timeval timeout = socket_read_timeout);
+
         int send(const char *data, int size);
 
         int receive(char *buffer, int size);
