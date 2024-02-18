@@ -20,7 +20,7 @@ namespace cumulus::connection {
 SSLSocket::SSLSocket(const std::string& certFile, const std::string& keyFile, int fd)
         : _ctx(nullptr), _ssl(nullptr), _socket_fd(fd) {
     // set timeout on socket read
-    setRecvTimeout(socket_read_timeout);
+//    setRecvTimeout(socket_read_timeout);
     initialize_ssl(certFile, keyFile);
 }
 

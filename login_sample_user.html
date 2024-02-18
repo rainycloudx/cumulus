@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://www.gstatic.com/firebasejs/ui/6.1.0/firebase-ui-auth.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.1.0/firebase-ui-auth.css" />
+</head>
+<body>
+
+    <script type="module">
+        import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js'
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfsJSqpArX9DaNCh-Pn-WVGIQ8U5dPgZ8",
+            authDomain: "cumulus-0.firebaseapp.com",
+            projectId: "cumulus-0",
+            storageBucket: "cumulus-0.appspot.com",
+            messagingSenderId: "251114315384",
+            appId: "1:251114315384:web:3603bc57b7edcbb589978d"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        console.log(app);
+
+        signInWithEmailAndPassword(auth, "shantanu.banerjee.vt@gmail.com", "int.main1234")
+            .then((userCredential) => {
+                var user = userCredential.user;
+                if (user) {
+                    user.getIdToken()
+                        .then((idToken) => {
+                            navigator.clipboard.writeText(idToken)
+                                .then(() => {
+                                    alert('Token copied to the clipboard:');
+                                })
+                                .catch((error) => {
+                                    console.error('Failed to copy text:', error);
+                                });
+                        })
+                        .catch((error) => {
+                            console.error('Error getting user ID token:', error);
+                        });
+                }
+            })
+            .catch((error) => {
+                var errorCode = error.code;
+                var errorMessage = error.message;
+            });
+    </script>
+
+</body>
+</html>

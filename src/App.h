@@ -5,9 +5,13 @@
 #ifndef CUMULUS_APP_H
 #define CUMULUS_APP_H
 
+#include "ClientThreadWorker.h"
 #include "auth/BaseAuth.h"
 #include "connection/ssl_sockserver.h"
+
 #include <string>
+#include <unordered_map>
+#include <mutex>
 
 namespace cumulus {
 
@@ -19,14 +23,6 @@ public:
     void run(void);
 
 private:
-    std::map<std::string, std::string> _env_vars =
-            {
-                    { constants::app_global::CERT_FILE_PATH_KEY, "" },
-                    { constants::app_global::KEY_FILE_PATH_KEY, "" },
-                    { constants::app_global::FIREBASE_WEBAPI_KEY_KEY, "" }
-            };
-
-    void parse_env_variables(char **argp);
 
     void handle_incoming_connections(std::shared_ptr<connection::SSLSocketServer> server);
 };

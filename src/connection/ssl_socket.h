@@ -8,6 +8,8 @@
 #include <string>
 
 #include "openssl/ssl.h"
+#include "../constants/config.h"
+
 
 namespace cumulus::connection {
     class SSLSocket {

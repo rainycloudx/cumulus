@@ -5,18 +5,18 @@
 #include "BaseAuth.h"
 #include "config.h"
 
-#include <algorithm>
-#include <fstream>
-#include <sstream>
+#include <iostream>
+
+#include "cpr/cpr.h"
 
 namespace cumulus {
 
-BaseAuth::BaseAuth(char **argp) {
+void * BaseAuth::GetUser(std::string &id_token) {
+    cpr::Response resp = cpr::Post(cpr::Url { constants::app_global::getUserAuthUrl() },
+            cpr::Payload {{ "idToken", id_token }});
 
-}
-
-BaseAuth::~BaseAuth() noexcept {
-
+    std::cout << resp.text << "\n";
+    return nullptr;
 }
 
 }

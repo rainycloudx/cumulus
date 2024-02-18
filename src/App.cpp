@@ -5,16 +5,20 @@
 #include "App.h"
 #include "constants/config.h"
 #include "ClientThreadWorker.h"
+#include "constants/EnvVars.h"
+#include "ClientConnectionServer.h"
 
 #include <iostream>
 #include <memory>
 #include <sstream>
 #include <thread>
+#include <vector>
+#include <array>
 
 namespace cumulus {
 
 App::App(int argc, char *argv[], char *argp[]) {
-    parse_env_variables(argp);
+    EnvVars::parse_env_variables(argp);
 }
 
 App::~App() {
@@ -22,71 +26,23 @@ App::~App() {
 }
 
 void App::run(void) {
-    std::shared_ptr<connection::SSLSocketServer> server;
-    try {
-        server = std::make_shared<connection::SSLSocketServer>(
-                static_cast<const std::string &>(_env_vars[constants::app_global::CERT_FILE_PATH_KEY]),
-                static_cast<const std::string &>(_env_vars[constants::app_global::KEY_FILE_PATH_KEY]),
-                constants::app_global::CUMULUS_PORT);
-        server->listen(5);
-        std::cout << "Server is listening" << std::endl;
-    } catch (std::exception& exp) {
-        std::cerr << "Unable to start the socket server \n Reason - " << exp.what() << std::endl;
-        throw exp;
-    }
 
-    try {
-        handle_incoming_connections(server);
-    } catch (std::exception& exp) {
-        std::cerr << exp.what();
-        throw exp;
-    }
-}
-
-
-void App::parse_env_variables(char **argp) {
-    auto _idx = 0;
-
-    auto separate_equals = [] (char *env) -> std::pair<std::string, std::string> {
-        std::stringstream s1, s2;
-        auto _sidx = 0;
-        while (env[_sidx] && env[_sidx] != '=') {
-            s1 << env[_sidx++];
-        }
-        if (env[_sidx] == '=') {
-            ++_sidx;
-            while (env[_sidx]) {
-                s2 << env[_sidx++];
-            }
-        }
-        return std::make_pair(s1.str(), s2.str());
+    std::array<ClientConnectionServer, 1> servers = {
+            ClientConnectionServer(constants::app_global::CUMULUS_PORT)
     };
 
-    while (argp[_idx]) {
-        auto p = separate_equals(argp[_idx]);
-        if (_env_vars.contains(p.first)) {
-            _env_vars[p.first] = std::move(p.second);
-        }
-        ++_idx;
+
+    for (auto& server : servers) {
+        server.run();
+        std::cout << "Started server on PORT [" << server.getPort() << "]\n";
     }
-}
 
-void App::handle_incoming_connections(std::shared_ptr<connection::SSLSocketServer> server) {
+    for (auto& server : servers) {
+        server.startAcceptingConnections();
+    }
 
-    while (true) {
-        auto client = server->accept();
-
-        std::thread t([&]() {
-            auto worker = std::unique_ptr<ClientThreadWorker>(nullptr);
-            try {
-                worker = std::make_unique<ClientThreadWorker>(std::move(client));
-            } catch (std::runtime_error& ex) {
-                std::cerr << ex.what() << "\n";
-                return;
-            }
-
-        });
-
+    for (auto& server : servers) {
+        server.terminate_thread();
     }
 }
 

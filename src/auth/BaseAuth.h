@@ -15,9 +15,11 @@ namespace cumulus {
 class BaseAuth {
 
 public:
-    BaseAuth(char **argp);
+    BaseAuth();
 
     virtual ~BaseAuth();
+
+    static void * GetUser(std::string& id_token);
 
 private:
 

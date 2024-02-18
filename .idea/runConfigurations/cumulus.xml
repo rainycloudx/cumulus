@@ -5,6 +5,7 @@
       <env name="CUMULUS_KEY_FILE_PATH" value="$PROJECT_DIR$/static/server.key" />
       <env name="FIREBASE_CPP_SDK_DIR" value="$PROJECT_DIR$/../..$USER_HOME$/Work/CLionProjects/cumulus/firebase-cpp-sdk" />
       <env name="FIREBASE_SERVICE_JSON" value="$PROJECT_DIR$/../../firebase-config.json" />
+      <env name="FIREBASE_WEBAPI_KEY" value="AIzaSyDfsJSqpArX9DaNCh-Pn-WVGIQ8U5dPgZ8" />
     </envs>
     <method v="2">
       <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />

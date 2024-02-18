@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.22)
 project(cumulus)
 
-set(CMAKE_CXX_STANDARD 23)
+#set(CMAKE_C_COMPILER /usr/bin/gcc)
+set(CMAKE_CXX_COMPILER /usr/bin/g++)
+set(CMAKE_CXX_STANDARD 17)
 
 include(FetchContent)
 FetchContent_Declare(cpr GIT_REPOSITORY https://github.com/libcpr/cpr.git
@@ -23,10 +25,13 @@ add_executable(cumulus
         src/App.cpp
         src/ClientThreadWorker.cpp
         src/auth/BaseAuth.cpp
+        src/constants/EnvVars.cpp
+        src/ClientConnectionServer.cpp
+        src/CurrentConnections.cpp
 )
 target_include_directories(
         cumulus PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/connection src/constants)
 
-
+set(CMAKE_CXX_FLAGS "-v")
 target_link_libraries(cumulus sslsocketutil cpr::cpr)
