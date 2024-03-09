@@ -19,7 +19,7 @@ ClientThreadWorker::~ClientThreadWorker() {
 }
 
 bool ClientThreadWorker::isConnectCommand() {
-    /*
+
     char buf;
     _socket->receive(&buf, 1);
     if (buf == protocol::CONNECT_CMD) {
@@ -30,10 +30,9 @@ bool ClientThreadWorker::isConnectCommand() {
         char token[size];
         _socket->receive(token, size);
         std::string token_s(token, size);
-//
+
         [[maybe_unused]] void * user = BaseAuth::GetUser(token_s);
     }
-     */
 
     // TODO - Leave authentication for now
 

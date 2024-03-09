@@ -12,10 +12,19 @@ FetchContent_MakeAvailable(cpr)
 
 find_package(OpenSSL REQUIRED)
 
-# Create the static library "libsslsocketutil.
-add_library(sslsocketutil STATIC
+# Create the static library "libsslsocketutil.so"
+add_library(sslsocketutil SHARED
         src/connection/ssl_socket.cpp
         src/connection/ssl_sockserver.cpp)
+
+target_include_directories(sslsocketutil PUBLIC src/connection)
+
+install(TARGETS sslsocketutil
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+        INCLUDES DESTINATION include
+)
 
 target_link_libraries(sslsocketutil PUBLIC OpenSSL::SSL PUBLIC OpenSSL::Crypto)
 

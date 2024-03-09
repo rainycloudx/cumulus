@@ -58,7 +58,7 @@ SSLSocket::~SSLSocket() {
     if (_ctx) SSL_CTX_free(_ctx);
 }
 
-int SSLSocket::send(const char *data, int size) {
+int SSLSocket::send(const char *data, int size) const {
     int totalSent = 0;
     while (size > 0) {
         int _sent = SSL_write(_ssl, data + totalSent, size);
@@ -68,14 +68,14 @@ int SSLSocket::send(const char *data, int size) {
     return totalSent;
 }
 
-int SSLSocket::receive(char *buffer, int size) {
-    int totalRecvd = 0;
+int SSLSocket::receive(char *buffer, int size) const {
+    int totalReceived = 0;
     while (size > 0) {
-        int _recvd = SSL_read(_ssl, buffer + totalRecvd, size);
-        totalRecvd += _recvd;
-        size -= _recvd;
+        int _received = SSL_read(_ssl, buffer + totalReceived, size);
+        totalReceived += _received;
+        size -= _received;
     }
-    return totalRecvd;
+    return totalReceived;
 }
 
 void SSLSocket::close() {
@@ -90,7 +90,7 @@ void SSLSocket::close() {
     }
 }
 
-int SSLSocket::setRecvTimeout(timeval timeout) {
+[[maybe_unused]] int SSLSocket::setRecvTimeout(timeval timeout) const {
     int ret = setsockopt(_socket_fd,
                SOL_SOCKET,
                SO_RCVTIMEO,

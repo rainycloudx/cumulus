@@ -10,13 +10,16 @@
 
 namespace cumulus {
 
+std::mutex ClientConnectionServer::connectionMapMutex;
+std::unordered_map<std::string, SharedP<ClientThreadWorker>> ClientConnectionServer::presentConnections;
+
 ClientConnectionServer::ClientConnectionServer(int port) : port(port) {}
 
 void ClientConnectionServer::run() {
     try {
         server = std::make_shared<connection::SSLSocketServer>(
-                static_cast<const std::string &>(EnvVars::get(constants::app_global::CERT_FILE_PATH_KEY)),
-                static_cast<const std::string &>(EnvVars::get(constants::app_global::KEY_FILE_PATH_KEY)),
+                static_cast<const std::string>(EnvVars::get(constants::app_global::CERT_FILE_PATH_KEY)),
+                static_cast<const std::string>(EnvVars::get(constants::app_global::KEY_FILE_PATH_KEY)),
                 port);
         server->listen(5);
         std::cout << "Server is listening on port" << port << "\n";
@@ -45,7 +48,7 @@ void ClientConnectionServer::startAcceptingConnections() {
                  * in the cache.
                  * For now storing this in this app only. In a map<user id, worker>
                  */
-                CurrentConnections::addConnection(worker);
+                ClientConnectionServer::addConnection(worker);
 
             } catch (std::runtime_error& ex) {
                 std::cerr << ex.what() << "\n";
@@ -62,6 +65,11 @@ void ClientConnectionServer::startAcceptingConnections() {
         }
 
     }
+}
+
+void ClientConnectionServer::addConnection(SharedP<cumulus::ClientThreadWorker> worker) {
+    std::lock_guard<std::mutex> lock(ClientConnectionServer::connectionMapMutex);
+    ClientConnectionServer::presentConnections[worker->getUserId()] = worker;
 }
 
 } // cumulus

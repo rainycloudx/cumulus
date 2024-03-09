@@ -28,11 +28,11 @@ namespace cumulus::connection {
 
         bool accept();
 
-        int setRecvTimeout(timeval timeout = socket_read_timeout);
+        [[maybe_unused]] int setRecvTimeout(timeval timeout = socket_read_timeout) const;
 
-        int send(const char *data, int size);
+        int send(const char *data, int size) const;
 
-        int receive(char *buffer, int size);
+        int receive(char *buffer, int size) const;
 
         void close();
 

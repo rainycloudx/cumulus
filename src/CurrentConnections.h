@@ -14,10 +14,6 @@ namespace cumulus {
 class CurrentConnections {
 public:
 
-    static void addConnection(SharedP<ClientThreadWorker> worker);
-
-    static std::mutex connectionMapMutex;
-    static std::unordered_map<std::string, SharedP<ClientThreadWorker>> presentConnections;
 };
 
 } // cumulus

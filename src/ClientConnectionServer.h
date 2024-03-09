@@ -31,6 +31,11 @@ public:
         th.join();
     }
 
+    static void addConnection(SharedP<ClientThreadWorker> worker);
+
+    static std::mutex connectionMapMutex;
+    static std::unordered_map<std::string, SharedP<ClientThreadWorker>> presentConnections;
+
 private:
     SharedP<connection::SSLSocketServer> server;
     std::thread th;
